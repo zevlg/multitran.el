@@ -6,7 +6,7 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.2
+;; Version: 0.3
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -34,8 +34,8 @@
 ;; Variables to customize:
 ;; ~~~~~~~~~~~~~~~~~~~~~~
 ;;
-;; * `multitran-languages' - Pair of languages for translation,
-;;   available languages are:
+;; * `multitran-languages' - Pair of languages for translation, for
+;;   example ("ru" . "en") for russian <-> english translation
 ;;
 ;; * `multitran-header-formatters' - Header line formatters
 ;;   You might want to add your custom formatters, like:
@@ -57,6 +57,10 @@
 ;;; History:
 ;;  ~~~~~~~
 ;;
+;; Version 0.3:
+;;   - Parser for reliability-of-translation span
+;;   - Workaround some html bugs (triggered by en-de translations)
+;; 
 ;; Version 0.2:
 ;;   - Support for header-line-format
 ;;   - Support for suggestions
@@ -333,19 +337,25 @@ Bindings:
 (put 'with-multitran-region 'lisp-indent-function 2)
 
 (defun multitran--parse-tag (tagname face)
-  "Parse <em> tags."
+  "Parse <TAGNAME> tags.
+Faceify tag contents with FACE."
   (save-excursion
     (while (search-forward (concat "<" tagname ">") nil t)
       (replace-match "" nil nil)
       (let ((cpont (point)))
-        (search-forward (concat "</" tagname ">") nil t)
-        (replace-match "" nil nil)
-        (multitran-faceify cpont (point) face)))))
+        (when (search-forward (concat "</" tagname ">") nil t)
+          ;; Do it only if tag is actually closed
+          (replace-match "" nil nil)
+          (multitran-faceify cpont (point) face))))))
 
 (defun multitran--parse-em ()
   (multitran--parse-tag "em" 'italic))
 
 (defun multitran--parse-i ()
+  (multitran--parse-tag "i" 'italic)
+
+  ;; NOTE: Some pages has non-closed <i> tags, so workaround it by
+  ;; parsing it twice
   (multitran--parse-tag "i" 'italic))
 
 (defun multitran--parse-with-replace (what to)
@@ -359,14 +369,24 @@ Bindings:
 (defun multitran--parse-amp ()
   (multitran--parse-with-replace "&amp;" " "))
 
-(defun multitran--parse-span-small ()
-  (save-excursion
-    (while (search-forward "<span class=\"small\">" nil t)
-      (replace-match "" nil nil)
-      (let ((cpont (point)))
-        (search-forward "</span>" nil t)
-        (replace-match "" nil nil)
-        (multitran-faceify cpont (point) 'subscript)))))
+(defmacro multitran--parse-span (span-re rep1 rep2 cpont &rest body)
+  "Parse span tag with contents of SPAN.
+Replaces open-tag with REP1.
+Replaces close-tag with REP2.
+
+Return point just after open-tag."
+  `(save-excursion
+     (while (re-search-forward ,span-re nil t)
+       (replace-match (or ,rep1 "") nil nil)
+       (let ((,cpont (point)))
+         (search-forward "</span>" nil t)
+         (replace-match (or ,rep2 "") nil nil)
+         ,@body))))
+
+(defun multitran--parse-reliability-of-translation ()
+  (multitran--parse-span
+   "<span title=\"reliability of translation = [0-9]/[0-9]\">"
+   "" "" cpont))
 
 (defun multitran--parse-span-gray (&optional rep1 rep2)
   (save-excursion
@@ -421,6 +441,7 @@ Bindings:
   (with-multitran-region start end
     (multitran--parse-links)
     (multitran--parse-span-gray)
+    (multitran--parse-reliability-of-translation)
     (multitran--parse-nbsp)
     (multitran--parse-amp)
     (multitran--parse-i)
