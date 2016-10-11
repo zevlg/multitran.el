@@ -60,7 +60,7 @@
 ;; Version 0.3:
 ;;   - Parser for reliability-of-translation span
 ;;   - Workaround some html bugs (triggered by en-de translations)
-;; 
+;;
 ;; Version 0.2:
 ;;   - Support for header-line-format
 ;;   - Support for suggestions
@@ -106,11 +106,6 @@ Otherwise header is inserted as plain text on top of multitran buffer."
 Order does not matter."
   :type `(cons ,multitran-language-choices
                ,multitran-language-choices)
-  :group 'multitran)
-
-(defcustom multitran-mode-hook nil
-  "*Hook to run before entering multitran-mode."
-  :type 'hook
   :group 'multitran)
 
 (defcustom multitran-history-max 100
@@ -309,23 +304,18 @@ Order does not matter."
                #'stringp (mapcar #'funcall multitran-header-formatters))
    ", "))
 
-(defun multitran-mode ()
+(define-derived-mode multitran-mode nil "multitran"
   "Major mode for browsing multitran output.
 
 Bindings:
-\\{multitran-mode-map}"
-  (interactive)
+\\{multitran-mode-map}
 
-  (use-local-map multitran-mode-map)
-  (setq major-mode 'multitran-mode
-        mode-name "multitran"
-        buffer-read-only t
+Entering multitran mode runs `multitran-mode-hook'."
+  :group 'multitran
+
+  (setq buffer-read-only t
         header-line-format multitran-header-line-format)
-
-  (set-buffer-modified-p nil)
-
-  ;; Finally run hooks
-  (run-hooks 'multitran-mode-hook))
+  (set-buffer-modified-p nil))
 
 (defmacro with-multitran-region (start end &rest body)
   (let ((bufcontent (cl-gensym)))
@@ -586,9 +576,8 @@ Make optional justification by JUSTIFY parameter."
     (pop-to-buffer (multitran--url url))))
 
 ;;;###autoload
-(defun multitran (word &optional lang)
-  "Lookup word in multitran dictionary.
-If prefix ARG is given, then select language."
+(defun multitran (word)
+  "Lookup word in multitran dictionary."
   (interactive
    (list
     (read-string
@@ -599,7 +588,7 @@ If prefix ARG is given, then select language."
   (when (string= word "")
     (setq word (current-word)))
 
-  (multitran--word word))
+  (multitran--word (or word (error "Nothing to translate"))))
 
 
 ;; Navigation
