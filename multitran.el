@@ -260,7 +260,7 @@ Order does not matter."
   :group 'multitran)
 
 (defsubst multitran-lang-code (lang)
-  (caddr (assoc lang multitran-languages-map)))
+  (cl-caddr (assoc lang multitran-languages-map)))
 
 (defun multitran-faceify (start end faces)
   (add-face-text-property start end faces))
