@@ -1,4 +1,4 @@
-;;; multitran.el --- Emacs interface to multitran
+;;; multitran.el --- Interface to multitran
 
 ;; Copyright (C) 2016 by Zajcev Evgeny
 
@@ -23,7 +23,7 @@
 
 ;;; Commentary:
 
-;; Multitran is 0-dependance Emacs interface to http://multitran.com
+;; Multitran is a zero-dependancy interface to http://multitran.com
 ;; online dictionary.
 ;;
 ;; Multitran supports *tons* of languages, including such languages
@@ -82,10 +82,10 @@
 
 (defvar multitran-language-choices
   '(choice (const :tag "English" "en")
-           (const :tag "Deutsche" "de")
-           (const :tag "Francaise" "fr")
+           (const :tag "Deutsch" "de")
+           (const :tag "Français" "fr")
            (const :tag "Italiano" "it")
-           (const :tag "Espanola" "es")))
+           (const :tag "Español" "es")))
 
 (defcustom multitran-header-formatters
   '(miltitran--hf-word multitran--hf-languages multitran--hf-history)
@@ -304,6 +304,7 @@ Order does not matter."
                #'stringp (mapcar #'funcall multitran-header-formatters))
    ", "))
 
+;;;###autoload
 (define-derived-mode multitran-mode nil "multitran"
   "Major mode for browsing multitran output.
 
