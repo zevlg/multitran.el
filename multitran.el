@@ -208,54 +208,20 @@ Order does not matter."
     ("ua" "Ukranian" "33")
     ))
 
-(defface multitran-gray-face
-  '((((class grayscale) (background light))
-     (:background "Gray90"))
-    (((class grayscale) (background dark))
-     (:foreground "Gray80"))
-    (((class color) (background light))
-     (:foreground "dimgray"))
-    (((class color) (background dark))
-     (:foreground "gray"))
-    (t (:weight bold :underline t)))
-  "Face for gray text."
-  :group 'multitran)
-
 (defface multitran-link-face
-  '((((class grayscale) (background light))
-     (:background "Gray90" :italic t :underline t))
-    (((class grayscale) (background dark))
-     (:foreground "Gray80" :italic t :underline t :bold t))
-    (((class color) (background light))
-     (:foreground "blue"))
-    (((class color) (background dark))
-     (:foreground "cyan" :bold t))
-    (t (:bold t :underline t)))
-  "Font lock face used to highlight links to other words"
-  :group 'multitran)
-
-(defface multitran-header-face
-  '((((class color) (background light))
-     (:foreground "Gray20" :background "Gray90"))
-    (((class color) (background dark))
-     (:foreground "Gray90" :background "Gray20"))
-    (((class grayscale) (background light))
-     (:background "LightGray" :weight bold))
-    (((class grayscale) (background dark))
-     (:foreground "DimGray" :weight bold))
-    (t (:weight bold)))
-  "Face used for displaying header-line."
+  '((t :inherit link))
+  "Face used to highlight links to other words."
   :group 'multitran)
 
 (defface multitran-section-face
   '((((class color) (background light))
      (:background "Gray70"))
     (((class color) (background dark))
-     (:background "Gray70"))
+     (:background "Gray20"))
     (((class grayscale) (background light))
      (:background "Gray70"))
     (((class grayscale) (background dark))
-     (:background "Gray70")))
+     (:background "Gray20")))
   "Face used for displaying translation section."
   :group 'multitran)
 
