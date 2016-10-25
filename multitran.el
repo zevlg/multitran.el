@@ -59,6 +59,8 @@
 ;;
 ;; BUGS before 0.4:
 ;;   - `miltutran' use last translation word if no current word [DONE]
+;;   - Not found messsage instead of
+;;            Search failed: "Suggest: <a href=[^<]+</a>"
 ;;   - `multitran-languages' is not saved in history
 ;;   - `multitran--goto-prev-prop' is not implemented
 ;; 
