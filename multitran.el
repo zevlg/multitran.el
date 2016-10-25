@@ -57,6 +57,11 @@
 ;;; History:
 ;;  ~~~~~~~
 ;;
+;; BUGS before 0.4:
+;;   - `miltutran' use last translation word if no current word [DONE]
+;;   - `multitran-languages' is not saved in history
+;;   - `multitran--goto-prev-prop' is not implemented
+;; 
 ;; Version 0.3:
 ;;   - Parser for reliability-of-translation span
 ;;   - Workaround some html bugs (triggered by en-de translations)
@@ -546,16 +551,19 @@ Make optional justification by JUSTIFY parameter."
 (defun multitran (word)
   "Lookup word in multitran dictionary."
   (interactive
-   (list
-    (read-string
-     (let ((cw (current-word)))
-       (if cw (format "Translate word [%s]: " cw) "Translate word: "))
-     nil 'multitran-read-history)))
+   (let ((default-value (if (current-word)
+                            (list (current-word))
+                          multitran-read-history)))
+     (list (read-string
+            (cond (default-value
+                    (format "Translate word [%s]: " (car default-value)))
+                  (t "Translate word: "))
+            nil 'multitran-read-history default-value))))
 
   (when (string= word "")
-    (setq word (current-word)))
+    (error "Nothing to translate"))
 
-  (multitran--word (or word (error "Nothing to translate"))))
+  (multitran--word word))
 
 
 ;; Navigation
