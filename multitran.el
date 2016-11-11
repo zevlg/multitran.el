@@ -61,10 +61,10 @@
 ;;   - [DONE] `miltutran' use last translation word if no current word
 ;;   - [DONE] Not found messsage instead of
 ;;            Search failed: "Suggest: <a href=[^<]+</a>"
-;;   - `multitran-languages' is not saved in history
+;;   - [DONE] `multitran-languages' is not saved in history
 ;;   - `multitran--goto-prev-prop' is not implemented
 ;;   - M-x multitran RET sath RET --> not parsed results
-;; 
+;;
 ;; Version 0.3:
 ;;   - Parser for reliability-of-translation span
 ;;   - Workaround some html bugs (triggered by en-de translations)
@@ -263,8 +263,10 @@ Order does not matter."
     (concat "Word: " (propertize word 'face 'bold))))
 
 (defun multitran--hf-languages ()
-  (let ((lang1 (car multitran-languages))
-        (lang2 (cdr multitran-languages)))
+  (let* ((hlang (plist-get (cdr (nth multitran-history-index multitran-history))
+                           :languages))
+         (lang1 (car (or hlang multitran-languages)))
+         (lang2 (cdr (or hlang multitran-languages))))
     (format "%s %c %s" lang1 #x21c4 lang2)))
 
 (defun multitran--hf-history ()
@@ -637,7 +639,9 @@ Make optional justification by JUSTIFY parameter."
   (when (> (length multitran-history) multitran-history-max)
     (setq multitran-history (butlast multitran-history)))
 
-  (push (list (buffer-string) :url url :word word :buffer buf) multitran-history)
+  (push (list (buffer-string) :url url :word word :buffer buf
+              :languages multitran-languages)
+        multitran-history)
   (setq multitran-history-index 0))
 
 (defun multitran--history-show ()
