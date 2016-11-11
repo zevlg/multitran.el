@@ -58,11 +58,12 @@
 ;;  ~~~~~~~
 ;;
 ;; BUGS before 0.4:
-;;   - `miltutran' use last translation word if no current word [DONE]
-;;   - Not found messsage instead of
+;;   - [DONE] `miltutran' use last translation word if no current word
+;;   - [DONE] Not found messsage instead of
 ;;            Search failed: "Suggest: <a href=[^<]+</a>"
 ;;   - `multitran-languages' is not saved in history
 ;;   - `multitran--goto-prev-prop' is not implemented
+;;   - M-x multitran RET sath RET --> not parsed results
 ;; 
 ;; Version 0.3:
 ;;   - Parser for reliability-of-translation span
@@ -533,7 +534,12 @@ Make optional justification by JUSTIFY parameter."
       (condition-case nil
           (multitran--try-parse-translation)
         (error
-         (multitran--try-parse-suggest)))
+         (condition-case nil
+             (multitran--try-parse-suggest)
+           (error
+            (erase-buffer)
+            (insert "\nCan't translate nor suggest")
+            (error "Can't translate %S" multitran-word)))))
 
       ;; Save into history
       (multitran--history-push multitran-word url cur-buf)
