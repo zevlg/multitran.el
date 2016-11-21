@@ -63,7 +63,8 @@
 ;;            Search failed: "Suggest: <a href=[^<]+</a>"
 ;;   - [DONE] `multitran-languages' is not saved in history
 ;;   - `multitran--goto-prev-prop' is not implemented
-;;   - M-x multitran RET sath RET --> not parsed results
+;;   - [DONE] M-x multitran RET sath RET --> not parsed results
+;;        remove "English thesaurus" anchor
 ;;
 ;; Version 0.3:
 ;;   - Parser for reliability-of-translation span
@@ -383,6 +384,12 @@ Return point just after open-tag."
           (multitran-linkify cpont (point) urlstr)
           (multitran-faceify cpont (point) 'multitran-link-face))))))
 
+(defun multitran--parse-a-name ()
+  ;; remove <a name="xxx">XXX</a> anchors
+  (save-excursion
+    (while (re-search-forward "<a name =[^>]*>[^<]*</[aA]>" nil t)
+      (replace-match "" nil nil))))
+
 (defun multitran--parse-section-title (start end)
   "Extract section's title."
   (with-multitran-region start end
@@ -392,6 +399,7 @@ Return point just after open-tag."
         (delete-region (match-beginning 0) (point-max))))
 
     (multitran--parse-links)
+    (multitran--parse-a-name)           ;remove "English thesaurus" anchor
     (multitran--parse-span-gray "/" "/")
     (multitran--parse-em)
 
