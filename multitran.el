@@ -6,7 +6,7 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.3
+;; Version: 0.4
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -57,14 +57,15 @@
 ;;; History:
 ;;  ~~~~~~~
 ;;
-;; BUGS before 0.4:
-;;   - [DONE] `miltutran' use last translation word if no current word
-;;   - [DONE] Not found messsage instead of
-;;            Search failed: "Suggest: <a href=[^<]+</a>"
-;;   - [DONE] `multitran-languages' is not saved in history
-;;   - `multitran--goto-prev-prop' is not implemented
-;;   - [DONE] M-x multitran RET sath RET --> not parsed results
-;;        remove "English thesaurus" anchor
+;; Version 0.4:
+;;   - Use last translation word if no current word
+;;   - Parse "English thesaurus" anchor for abbr look like words,
+;;         for example M-x multitran RET sath RET
+;;   - Show "Can't translate" messsage instead of
+;;         Search failed: "Suggest: <a href=[^<]+</a>"
+;;   - Save `multitran-languages' in history
+;;   - `multitran-prev-link' implemented, now <backtab> is working
+;;   - Infinite loop bug fixed in `multitran-next-section'
 ;;
 ;; Version 0.3:
 ;;   - Parser for reliability-of-translation span
@@ -585,30 +586,39 @@ Make optional justification by JUSTIFY parameter."
 
 
 ;; Navigation
-(defun multitran--goto-prev-prop (prop-name)
-  "Move point to previous property PROP-NAME."
-  ;; TODO:
-  ;; previous-single-property-change
-  )
-
-(defun multitran--goto-next-prop (prop-name)
-  "Move point to next property PROP-NAME."
+(defun multitran--goto-prop-in-direction (prop-name prop-change-func error)
   (let ((pnt (point))
         (orig-val (get-text-property (point) prop-name))
         (nval nil))
     (while (and pnt (or (null nval) (equal orig-val nval)))
-      (setq pnt (next-single-property-change pnt prop-name)
+      (setq pnt (funcall prop-change-func pnt prop-name)
             nval (get-text-property (or pnt (point)) prop-name)))
     (unless pnt
-      (signal 'end-of-buffer nil))
+      (signal error nil))
 
     (goto-char pnt)))
+
+(defun multitran--goto-link (direction)
+  (multitran--goto-prop-in-direction
+   'multitran-link
+   (if (eq direction :next)
+       #'next-single-property-change
+     #'previous-single-property-change)
+   (if (eq direction :next)
+       'end-of-buffer
+     'beginning-of-buffer)))
 
 (defun multitran-next-link (&optional n)
   "Jump to next N link."
   (interactive "p")
   (dotimes (_ n)
-    (multitran--goto-next-prop 'multitran-link)))
+    (multitran--goto-link :next)))
+
+(defun multitran-prev-link (&optional n)
+  "Jump to previous N link."
+  (interactive "p")
+  (dotimes (_ n)
+    (multitran--goto-link :prev)))
 
 (defun multitran-follow-link (relative-url)
   "Follow relative url."
@@ -618,14 +628,19 @@ Make optional justification by JUSTIFY parameter."
     (multitran--url (format "%s%s" multitran-url relative-url))))
 
 (defun multitran--goto-section (direction)
-  (let ((found nil))
-    (while (not found)
-      (if (eq direction :next)
-          (forward-line)
-        (forward-line -1))
-      (goto-char (point-at-bol))
+  (let ((advance (if (eq direction :next) 1 -1))
+        section-point found)
+    (save-excursion
+      (while (not section-point)
+        (when (eq (forward-line advance) advance)
+          (error (format "No %s section" direction)))
+        (goto-char (point-at-bol))
 
-      (setq found (multitran--face-at-point-p 'multitran-section-face)))))
+        (when (multitran--face-at-point-p 'multitran-section-face)
+          (setq section-point (point)))))
+
+    (when section-point
+      (goto-char section-point))))
 
 (defun multitran-next-section (&optional n)
   "Jump to next N section."
