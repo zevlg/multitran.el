@@ -1,5 +1,5 @@
 # multitran.el
-Emacs interface to multitran.com
+Emacs interface to [multitran.com](http://multitran.com "Multitran")
 
 # Install:
 
