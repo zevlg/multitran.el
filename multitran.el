@@ -6,7 +6,7 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.2
+;; Version: 0.4.3
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -332,8 +332,8 @@ Faceify tag contents with FACE."
     (while (search-forward what nil t)
       (replace-match to nil nil))))
 
-(defun multitran--parse-nbsp ()
-  (multitran--parse-with-replace "&nbsp;" " "))
+(defun multitran--parse-nbsp (&optional to)
+  (multitran--parse-with-replace "&nbsp;" (or to " ")))
 
 (defun multitran--parse-amp ()
   (multitran--parse-with-replace "&amp;" " "))
@@ -419,6 +419,7 @@ Return point just after open-tag."
 
 (defun multitran--parse-subj (start end)
   (with-multitran-region start end
+    (multitran--parse-nbsp "")
     (multitran--parse-links :no-linkfy-and-facefy)
     (buffer-string)))
 
@@ -464,7 +465,7 @@ First element is parsed title, rest elements are in form
 
   ;; NOTE: Since nov 2018 multitran inserts \r\n instead of \n
   (save-excursion
-    (while (re-search-forward "\r" nil t)
+    (while (search-forward "\r" nil t)
       (replace-match "")))
 
   (let ((start (search-forward "<table width=\"100%\">\n"))
