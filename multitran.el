@@ -6,7 +6,7 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.1
+;; Version: 0.4.2
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -218,7 +218,7 @@ Order does not matter."
 (defvar multitran-word "" "Currently translated word.")
 (defvar multitran-saved-window-condition nil)
 
-(defconst multitran-url "https://multitran.com"
+(defconst multitran-url "https://multitran.com/m.exe?"
   "URL to use in order to search for words.")
 
 (defface multitran-link-face
@@ -365,6 +365,15 @@ Return point just after open-tag."
         (search-forward "</span>" nil t)
         (replace-match (or rep2 "") nil nil)))))
 
+(defun multitran--parse-span-rgb (&optional rep1 rep2)
+  (save-excursion
+    (while (search-forward "<span STYLE=\"color:rgb(60,179,113)\">" nil t)
+      (replace-match (or rep1 "") nil nil)
+      (save-excursion
+        (let ((cpont (point)))
+          (search-forward "</span>" nil t)
+          (replace-match (or rep2 "") nil nil))))))
+
 (defun multitran--parse-links (&optional no-props)
   ;; <a href=" -> insert 'multitran-link prop
   (save-excursion
@@ -417,6 +426,7 @@ Return point just after open-tag."
   (with-multitran-region start end
     (multitran--parse-links)
     (multitran--parse-span-gray)
+    (multitran--parse-span-rgb)
     (multitran--parse-reliability-of-translation)
     (multitran--parse-nbsp)
     (multitran--parse-amp)
@@ -451,6 +461,12 @@ First element is parsed title, rest elements are in form
 (defun multitran--parse-html ()
   "Process html contents and return list of sections."
   (goto-char (point-min))
+
+  ;; NOTE: Since nov 2018 multitran inserts \r\n instead of \n
+  (save-excursion
+    (while (re-search-forward "\r" nil t)
+      (replace-match "")))
+
   (let ((start (search-forward "<table width=\"100%\">\n"))
         (end (search-forward "</table>"))
         section-points sections)
