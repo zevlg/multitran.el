@@ -6,7 +6,7 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.3
+;; Version: 0.4.4
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -97,36 +97,37 @@
   :group 'hypermedia)
 
 (defvar multitran-languages-alist
-  '(("Chinese"            . "zh")
-    ("Czech"              . "cs")
-    ("English"            . "en")
-    ("Esperanto"          . "eo")
-    ("German"             . "de")
-    ("Greek"              . "el")
-    ("Finnish"            . "fi")
-    ("French"             . "fr")
-    ("Irish"              . "ga")
-    ("Italian"            . "it")
-    ("Latin"              . "la")
-    ("Japanese"           . "ja")
-    ("Korean"             . "ko")
-    ("Portuguese"         . "pt")
-    ("Russian"            . "ru")
-    ("Swedish"            . "sv")
-    ("Slovak"             . "sk")
-    ("Slovenian"          . "sl")
-    ("Spanish"            . "es")
-    ("Ukranian"           . "uk"))
+  '(("Chinese"            "zh" "17")
+    ("Czech"              "cs" "16")
+    ("English"            "en" "1")
+    ("Esperanto"          "eo" "34")
+    ("German"             "de" "3")
+    ("Greek"              "el" "38")
+    ("Finnish"            "fi" "36")
+    ("French"             "fr" "4")
+    ("Irish"              "ga" "49")
+    ("Italian"            "it" "23")
+    ("Latin"              "la" "37")
+    ("Japanese"           "ja" "28")
+    ("Korean"             "ko" "39")
+    ("Portuguese"         "pt" "11")
+    ("Russian"            "ru" "2")
+    ("Swedish"            "sv" "29")
+    ("Slovak"             "sk" "60")
+    ("Slovenian"          "sl" "67")
+    ("Spanish"            "es" "5")
+    ("Ukranian"           "uk" "33"))
   "Alist of the languages supported by multitran.com
 
-Each element is a cons-cell of the form (NAME . CODE), where NAME
-is a human-readable language name and CODE is its code used as a
-query parameter in HTTP requests.")
+Each element is a cons-cell of the form (NAME ABBREV NUM), where
+NAME is a human-readable language name, ABBREV is two chars
+language abbreviation and NUM is its code used as a query
+parameter in HTTP requests.")
 
 (defvar multitran-language-choices
   (list 'choice
-        (mapcar (lambda (lang-pair)
-                  (list 'const :tag (car lang-pair) (cdr lang-pair)))
+        (mapcar (lambda (lang)
+                  (list 'const :tag (car lang) (car lang)))
                 multitran-languages-alist)))
 
 (defcustom multitran-header-formatters
@@ -143,7 +144,7 @@ Otherwise header is inserted as plain text on top of multitran buffer."
   :type 'list
   :group 'multitran)
 
-(defcustom multitran-languages '("en" . "ru")
+(defcustom multitran-languages '("English" . "Russian")
   "*Default languages to translate from and to.
 Order does not matter."
   :type `(cons ,multitran-language-choices
@@ -218,7 +219,7 @@ Order does not matter."
 (defvar multitran-word "" "Currently translated word.")
 (defvar multitran-saved-window-condition nil)
 
-(defconst multitran-url "https://multitran.com/m.exe?"
+(defconst multitran-url "https://multitran.com"
   "URL to use in order to search for words.")
 
 (defface multitran-link-face
@@ -281,6 +282,14 @@ Order does not matter."
    #'identity (cl-remove-if-not
                #'stringp (mapcar #'funcall multitran-header-formatters))
    ", "))
+
+(defun multitran-lang--code (lang)
+  (cl-caddr (assoc lang multitran-languages-alist)))
+
+(defun multitran-lang--by-code (code)
+  (car (cl-find code multitran-languages-alist
+                :test (lambda (code lang)
+                        (string= (cl-caddr lang) code)))))
 
 ;;;###autoload
 (define-derived-mode multitran-mode nil "multitran"
@@ -468,6 +477,10 @@ First element is parsed title, rest elements are in form
     (while (search-forward "\r" nil t)
       (replace-match "")))
 
+  (save-excursion
+    (when (re-search-forward "<title>\\([^<]+\\)</title>")
+      (setq multitran-word (match-string 1))))
+
   (let ((start (search-forward "<table width=\"100%\">\n"))
         (end (search-forward "</table>"))
         section-points sections)
@@ -544,7 +557,7 @@ Make optional justification by JUSTIFY parameter."
 
 (defun multitran--url (url)
   "Fetch and view multitran URL."
-  (let ((cur-buf (current-buffer)) langs)
+  (let ((cur-buf (current-buffer)))
     (unless (eq major-mode 'multitran-mode)
       (setq multitran-saved-window-condition
             (current-window-configuration)))
@@ -553,13 +566,9 @@ Make optional justification by JUSTIFY parameter."
       (setq buffer-read-only nil)
       (erase-buffer)
 
-      ;; Extract languages and word from the url
-      (when (string-match "/\\([^/]+\\)/\\([^/]+\\)/\\([^/]+\\)$" url)
-        (setq langs (cons (match-string 1 url) (match-string 2 url)))
-        (setq multitran-word (match-string 3 url)))
-
       ;; Fetch/process html
       (url-insert-file-contents url)
+
       (condition-case nil
           (multitran--try-parse-translation)
         (error
@@ -571,7 +580,7 @@ Make optional justification by JUSTIFY parameter."
             (error "Can't translate %S, url: %s" multitran-word url)))))
 
       ;; Save into history
-      (multitran--history-push multitran-word langs url cur-buf)
+      (multitran--history-push multitran-word url cur-buf)
 
       (multitran-mode)
       (current-buffer))))
@@ -580,12 +589,11 @@ Make optional justification by JUSTIFY parameter."
   (let* ((completion-ignore-case t)
          (lang1 (completing-read
                  (format "Translate \"%s\" from: " word)
-                 multitran-languages-alist))
+                 multitran-languages-alist nil t))
          (lang2 (completing-read
                  (format "Translate \"%s\" from %s to: " word lang1)
-                 multitran-languages-alist)))
-    (cons (cdr (assoc lang1 multitran-languages-alist))
-          (cdr (assoc lang2 multitran-languages-alist)))))
+                 multitran-languages-alist nil t)))
+    (cons lang1 lang2)))
 
 ;;;###autoload
 (defun multitran (word &optional langs)
@@ -608,9 +616,18 @@ Use `C-u' prefix to select languages."
   (when (string= word "")
     (error "Nothing to translate"))
 
+  ;; Check languages for validity
+  (unless (and (multitran-lang--code (car langs))
+               (multitran-lang--code (cdr langs)))
+    (error "Invalid languages used: %S" langs))
+
   (pop-to-buffer
    (multitran--url
-    (format "%s/%s/%s/%s" multitran-url (car langs) (cdr langs) word))))
+    (format "%s/m.exe?l1=%s&l2=%s&s=%s"
+            multitran-url
+            (multitran-lang--code (car langs))
+            (multitran-lang--code (cdr langs))
+            word))))
 
 
 ;; Navigation
@@ -684,14 +701,21 @@ Use `C-u' prefix to select languages."
 
 
 ;; History
-(defun multitran--history-push (word &optional langs url buf)
+(defun multitran--history-push (word &optional url buf)
   "Push WORD into multitran history."
   ;; truncate history
   (when (> (length multitran-history) multitran-history-max)
     (setq multitran-history (butlast multitran-history)))
 
-  (push (list (buffer-string) :url url :word word :buffer buf :languages langs)
-        multitran-history)
+  (let ((langs (copy-list multitran-languages)))
+    (when (string-match "l1=\\([0-9]+\\)" url)
+      (setcar langs (multitran-lang--by-code (match-string 1 url))))
+    (when (string-match "l2=\\([0-9]+\\)" url)
+      (setcdr langs (multitran-lang--by-code (match-string 1 url))))
+
+    (push (list (buffer-string) :url url :word word :buffer buf :languages langs)
+          multitran-history))
+
   (setq multitran-history-index 0))
 
 (defun multitran--history-show ()
