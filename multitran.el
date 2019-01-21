@@ -1,13 +1,13 @@
 ;;; multitran.el --- Interface to multitran
 
-;; Copyright (C) 2016 by Zajcev Evgeny
+;; Copyright (C) 2016-2019 by Zajcev Evgeny
 
 ;; Author: Zajcev Evgeny <zevlg@yandex.ru>
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.5
-(defconst multitran-version "0.4.5")
+;; Version: 0.4.6
+(defconst multitran-version "0.4.6")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -338,6 +338,9 @@ Faceify tag contents with FACE."
   ;; parsing it twice
   (multitran--parse-tag "i" 'italic))
 
+(defun multitran--parse-b ()
+  (multitran--parse-tag "b" 'bold))
+
 (defun multitran--parse-with-replace (what to)
   (save-excursion
     (while (search-forward what nil t)
@@ -443,6 +446,9 @@ Return point just after open-tag."
     (multitran--parse-nbsp)
     (multitran--parse-amp)
     (multitran--parse-i)
+    ;; NOTE: <b> has been seen for example in
+    ;; en->ru translation for "brackets"
+    (multitran--parse-b)
     (buffer-string)))
 
 (defun multitran--parse-section (start end)
@@ -736,8 +742,6 @@ Use `C-u' prefix to select languages."
 (defun multitran-history-goto (direction &optional n)
   "Navigate history N times.
 DIRECTION is one of 'next or 'prev."
-  (interactive)
-
   (setq n (% n (length multitran-history)))
 
   ;; Calculate position
