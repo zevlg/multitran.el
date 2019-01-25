@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.6
-(defconst multitran-version "0.4.6")
+;; Version: 0.4.7
+(defconst multitran-version "0.4.7")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -391,7 +391,8 @@ Return point just after open-tag."
 (defun multitran--parse-links (&optional no-props)
   ;; <a href=" -> insert 'multitran-link prop
   (save-excursion
-    (while (re-search-forward "<a [^>]*href=[\"']\\([^<>]*\\)[\"']>" nil t)
+    ;; NOTE: '<' occurs inside href value for en->ru for "process"
+    (while (re-search-forward "<a [^>]*href=[\"']\\([^\"]+\\)[\"']>" nil t)
       (let ((urlstr (match-string 1))
             cpont)
 
