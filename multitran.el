@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.7
-(defconst multitran-version "0.4.7")
+;; Version: 0.4.8
+(defconst multitran-version "0.4.8")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -60,6 +60,10 @@
 ;;; History:
 ;;  ~~~~~~~
 ;;
+;; Version 0.4.9: [TODO]
+;;   - Support for symbols like &#x2192
+;;   - Support for <a target=xxx ...>, seen in "the" translation
+;; 
 ;; Version 0.4.1:
 ;;   - Select custom languages if `C-u' is supplied to
 ;;      M-x multitran RET
@@ -391,8 +395,10 @@ Return point just after open-tag."
 (defun multitran--parse-links (&optional no-props)
   ;; <a href=" -> insert 'multitran-link prop
   (save-excursion
-    ;; NOTE: '<' occurs inside href value for en->ru for "process"
-    (while (re-search-forward "<a [^>]*href=[\"']\\([^\"]+\\)[\"']>" nil t)
+    ;; NOTE:
+    ;;  - '<' occurs inside href value for en->ru for "process"
+    ;;  - Link can have leading space(s) 
+    (while (re-search-forward "<a [^>]*href=[\"']\\([^\"]+\\)[\"']>\s*" nil t)
       (let ((urlstr (match-string 1))
             cpont)
 
