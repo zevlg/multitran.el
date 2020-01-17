@@ -1,13 +1,13 @@
 ;;; multitran.el --- Interface to multitran
 
-;; Copyright (C) 2016-2019 by Zajcev Evgeny
+;; Copyright (C) 2016-2020 by Zajcev Evgeny
 
 ;; Author: Zajcev Evgeny <zevlg@yandex.ru>
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.9
-(defconst multitran-version "0.4.9")
+;; Version: 0.4.10
+(defconst multitran-version "0.4.10")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 ;; online dictionary.
 ;;
 ;; Multitran supports *tons* of languages, including such languages
-;; as: Esperanto, Latin and Luxembourgish.  
+;; as: Esperanto, Latin and Luxembourgish.
 ;; See https://www.multitran.com/m.exe?a=1&all=32
 ;; for full list and feel free to add new languages to
 ;; `multitran-languages-alist' if you missing one.
@@ -60,15 +60,15 @@
 ;;; History:
 ;;  ~~~~~~~
 ;;
-;; Version 0.4.10: [TODO]
-;;   - Support for symbols like &#x2192
+;; Version 0.4.10:
+;;   - Support for symbols like &#8658; seen in "go" translation
 ;;   - Support for <a target=xxx ...>, seen in "the" translation
-;; 
+;;
 ;; Version 0.4.1:
 ;;   - Select custom languages if `C-u' is supplied to
 ;;      M-x multitran RET
 ;;   - Fixes due to multitran.com API changes
-;;   
+;;
 ;; Version 0.4:
 ;;   - Use last translation word if no current word
 ;;   - Parse "English thesaurus" anchor for abbr look like words,
@@ -356,6 +356,12 @@ Faceify tag contents with FACE."
 (defun multitran--parse-amp ()
   (multitran--parse-with-replace "&amp;" " "))
 
+(defun multitran--parse-unicode-chars ()
+  (save-excursion
+    (while (re-search-forward "&#\\([0-9]+\\);" nil t)
+      (let ((uchar (char-to-string (string-to-number (match-string 1)))))
+        (replace-match uchar nil nil)))))
+
 (defmacro multitran--parse-span (span-re rep1 rep2 cpont &rest body)
   "Parse span tag with contents of SPAN.
 Replaces open-tag with REP1.
@@ -397,8 +403,9 @@ Return point just after open-tag."
   (save-excursion
     ;; NOTE:
     ;;  - '<' occurs inside href value for en->ru for "process"
-    ;;  - Link can have leading space(s) 
-    (while (re-search-forward "<a [^>]*href=[\"']\\([^\"]+\\)[\"']>\s*" nil t)
+    ;;  - Link can have leading space(s)
+    (while (re-search-forward
+            "<a [^>]*href=[\"']\\([^\"]+\\)[\"'][^>]*>\s*" nil t)
       (let ((urlstr (match-string 1))
             cpont)
 
@@ -456,6 +463,7 @@ Return point just after open-tag."
     ;; NOTE: <b> has been seen for example in
     ;; en->ru translation for "brackets"
     (multitran--parse-b)
+    (multitran--parse-unicode-chars)
     (buffer-string)))
 
 (defun multitran--parse-section (start end)
