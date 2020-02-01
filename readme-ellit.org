@@ -47,7 +47,7 @@ Make sure your MELPA package archive is up-to-date with
    - Parse "English thesaurus" anchor for abbr look like words,
      for example {{{kbd(M-x multitran RET sath RET)}}}
    - Show "Can't translate" messsage instead of
-     =Search failed: "Suggest: <a href=[^<]+</a>"=
+     "Search failed: Suggest: <a href=[^<]+</a>"
    - Save ~multitran-languages~ in history
    - ~multitran-prev-link~ implemented, now {{{kbd(<backtab>)}}} is working
    - Infinite loop bug fixed in ~multitran-next-section~

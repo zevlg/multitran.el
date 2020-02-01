@@ -76,7 +76,7 @@ Or just tweak following user options in your =init.el=:
 - Parse "English thesaurus" anchor for abbr look like words,
   for example @@html:<kbd>@@M-x multitran RET sath RET@@html:</kbd>@@
 - Show "Can't translate" messsage instead of
-  =Search failed: "Suggest: <a href=[^<]+</a>"=
+  "Search failed: Suggest: <a href=[^<]+</a>"
 - Save ~multitran-languages~ in history
 - ~multitran-prev-link~ implemented, now @@html:<kbd>@@<backtab>@@html:</kbd>@@ is working
 - Infinite loop bug fixed in ~multitran-next-section~
@@ -91,5 +91,5 @@ Or just tweak following user options in your =init.el=:
 - Many languages added
 
 ** Version 0.1:
-- Base port of some =rdict= functionality
+- Base port of some =rdict.el= functionality
 - html parsers
