@@ -25,10 +25,10 @@ select translation languages.
 * Installing
 
 Install from [[http://melpa.org][MELPA]] using
-{{{kbd(M-x package-install RET multitran RET}}}.
+@@html:<kbd>@@M-x package-install RET multitran RET@@html:</kbd>@@.
 
 Make sure your MELPA package archive is up-to-date with
-{{{kbd(M-x package-refresh-contents RET}}}
+@@html:<kbd>@@M-x package-refresh-contents RET@@html:</kbd>@@
 
 * Variables to customize
 

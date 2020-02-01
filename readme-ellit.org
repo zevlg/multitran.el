@@ -24,10 +24,10 @@ select translation languages.
 * Installing
 
 Install from [[http://melpa.org][MELPA]] using
-{{{kbd(M-x package-install RET multitran RET}}}.
+{{{kbd(M-x package-install RET multitran RET)}}}.
 
 Make sure your MELPA package archive is up-to-date with
-{{{kbd(M-x package-refresh-contents RET}}}
+{{{kbd(M-x package-refresh-contents RET)}}}
 
 #+ELLIT-INCLUDE: multitran.el :heading * Variables to customize
 
