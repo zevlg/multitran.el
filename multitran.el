@@ -24,79 +24,18 @@
 
 ;;; Commentary:
 
-;; Multitran is a zero-dependancy interface to http://multitran.com
-;; online dictionary.
-;;
-;; Multitran supports *tons* of languages, including such languages
-;; as: Esperanto, Latin and Luxembourgish.
-;; See https://www.multitran.com/m.exe?a=1&all=32
-;; for full list and feel free to add new languages to
-;; `multitran-languages-alist' if you missing one.
-;;
-;; Variables to customize:
-;; ~~~~~~~~~~~~~~~~~~~~~~
-;;
-;; * `multitran-languages' - Pair of languages for translation, for
-;;   example ("Russian" . "English") for russian <-> english
-;;   translation
-;;
-;; * `multitran-header-formatters' - Header line formatters
-;;   You might want to add your custom formatters, like:
-;;
-;;    (defun my-multitran--hf-wordfreq ()
-;;      "Show word's frequency rank."
-;;      (let ((wfreq (wordfreq-find (or multitran-word ""))))
-;;        (and wfreq (format "FRank: %S" (cadr wfreq)))))
-;;
-;;    (setq multitran-header-formatters
-;;          '(miltitran--hf-word multitran--hf-languages
-;;            my-multitran--hf-wordfreq multitran--hf-history))
-;;
-;;   Where `wordfreq-find' is from
-;;   https://raw.githubusercontent.com/zevlg/emacs-stuff/master/wordfreq.el
-;;
-;; * `multitran-mode-hook' - hook is run after entering multitran-mode
-;;
-;;; History:
-;;  ~~~~~~~
-;;
-;; Version 0.4.10:
-;;   - Support for symbols like &#8658; seen in "go" translation
-;;   - Support for <a target=xxx ...>, seen in "the" translation
-;;
-;; Version 0.4.1:
-;;   - Select custom languages if `C-u' is supplied to
-;;      M-x multitran RET
-;;   - Fixes due to multitran.com API changes
-;;
-;; Version 0.4:
-;;   - Use last translation word if no current word
-;;   - Parse "English thesaurus" anchor for abbr look like words,
-;;         for example M-x multitran RET sath RET
-;;   - Show "Can't translate" messsage instead of
-;;         Search failed: "Suggest: <a href=[^<]+</a>"
-;;   - Save `multitran-languages' in history
-;;   - `multitran-prev-link' implemented, now <backtab> is working
-;;   - Infinite loop bug fixed in `multitran-next-section'
-;;
-;; Version 0.3:
-;;   - Parser for reliability-of-translation span
-;;   - Workaround some html bugs (triggered by en-de translations)
-;;
-;; Version 0.2:
-;;   - Support for header-line-format
-;;   - Support for suggestions
-;;   - Many languages added
-;;
-;; Version 0.1:
-;;   - Base port of some rdict functionality
-;;   - html parsers
+;; See https://github.com/zevlg/multitran.el
 
 ;;; Code:
 
 (require 'cl-lib)
 (require 'url)
 
+;; * Variables to customize
+;; 
+;; You can customize =multitran.el= with {{{kbd(M-x customize-group RET multitran RET)}}} using Emacs [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Easy-Customization.html#Easy-Customization][Easy Customization Interface]]
+;;
+;; Or just tweak following user options in your =init.el=:
 (defgroup multitran nil
   "Interface to the multitran dictionary."
   :prefix "multitran-"
@@ -136,6 +75,35 @@ parameter in HTTP requests.")
                   (list 'const :tag (car lang) (car lang)))
                 multitran-languages-alist)))
 
+;; - User Option: ~multitran-languages~
+;;
+;;   Pair of languages for translation, for example
+;;   ~("Russian" . "English")~ for russian <-> english translation.
+(defcustom multitran-languages '("English" . "Russian")
+  "*Default languages to translate from and to.
+Order does not matter."
+  :type `(cons ,multitran-language-choices
+               ,multitran-language-choices)
+  :group 'multitran)
+
+;; - User Option: ~multitran-header-formatters~
+;;
+;;   {{{vardoc1(multitran-header-formatters)}}}
+;;
+;;   You might want to add your custom formatters, such as:
+;;   #+begin_src emacs-lisp
+;;   (defun my-multitran--hf-wordfreq ()
+;;     "Show word's frequency rank."
+;;     (let ((wfreq (wordfreq-find (or multitran-word ""))))
+;;       (and wfreq (format "FRank: %S" (cadr wfreq)))))
+;;
+;;   (setq multitran-header-formatters
+;;         '(miltitran--hf-word multitran--hf-languages
+;;           my-multitran--hf-wordfreq multitran--hf-history))
+;;   #+end_src
+;;
+;;   Where ~wordfreq-find~ is from
+;;   [[https://raw.githubusercontent.com/zevlg/emacs-stuff/master/wordfreq.el][wordfreq.el]]
 (defcustom multitran-header-formatters
   '(miltitran--hf-word multitran--hf-languages multitran--hf-history)
   "*List of format functions to compose multitran header."
@@ -148,13 +116,6 @@ parameter in HTTP requests.")
 If non-nil then header is used to display multitran header.
 Otherwise header is inserted as plain text on top of multitran buffer."
   :type 'list
-  :group 'multitran)
-
-(defcustom multitran-languages '("English" . "Russian")
-  "*Default languages to translate from and to.
-Order does not matter."
-  :type `(cons ,multitran-language-choices
-               ,multitran-language-choices)
   :group 'multitran)
 
 (defcustom multitran-history-max 100
@@ -182,6 +143,7 @@ Order does not matter."
   :type (get 'default-justification 'custom-type)
   :group 'multitran)
 
+
 (defvar multitran-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "n") 'next-line)
