@@ -90,6 +90,8 @@ Or just tweak following user options in your =init.el=:
 :CUSTOM_ID: version-0411
 :END:
 
+- Use ~word-at-point~ instead of ~current-word~ for better word
+  at point recognition.
 - Integration with =avy= by providing ~multitran-at-pos~ function.
 
 ** Version 0.4.10:
