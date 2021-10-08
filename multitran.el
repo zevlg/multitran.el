@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.11
-(defconst multitran-version "0.4.11")
+;; Version: 0.4.12
+(defconst multitran-version "0.4.12")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -502,7 +502,8 @@ First element is parsed title, rest elements are in form
       (replace-match "")))
 
   (save-excursion
-    (when (re-search-forward "<title>\\([^<]+\\)</title>")
+    ;; NOTE: non-greedy match using "+?" syntax
+    (when (re-search-forward "<title>\\([^<]+?\\)\\( &ndash;.*\\)?</title>")
       (setq multitran-word (match-string 1))))
 
   (let ((start (search-forward "<table width=\"100%\">\n"))
@@ -842,6 +843,10 @@ DIRECTION is one of 'next or 'prev."
 ;;; ellit-org: history
 ;;
 ;; * History
+;;
+;; ** Version 0.4.12:
+;;    - Title format has been changed, so we multitran adopted regex
+;;      to extract word from the title.
 ;;
 ;; ** Version 0.4.11:
 ;;    - Use ~word-at-point~ instead of ~current-word~ for better word

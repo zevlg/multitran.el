@@ -33,7 +33,6 @@ Install from [[http://melpa.org][MELPA]] using
 Make sure your MELPA package archive is up-to-date with
 @@html:<kbd>@@M-x package-refresh-contents RET@@html:</kbd>@@
 
-
 * Variables to customize
 :PROPERTIES:
 :CUSTOM_ID: variables-to-customize
@@ -84,6 +83,14 @@ Or just tweak following user options in your =init.el=:
 :PROPERTIES:
 :CUSTOM_ID: history
 :END:
+
+** Version 0.4.12:
+:PROPERTIES:
+:CUSTOM_ID: version-0412
+:END:
+
+- Title format has been changed, so we multitran adopted regex
+  to extract word from the title.
 
 ** Version 0.4.11:
 :PROPERTIES:
