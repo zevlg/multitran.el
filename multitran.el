@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.12
-(defconst multitran-version "0.4.12")
+;; Version: 0.4.13
+(defconst multitran-version "0.4.13")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -482,7 +482,7 @@ First element is parsed title, rest elements are in form
     (with-multitran-region sec-start end
       (while (search-forward "<tr><td class=\"subj\" width=\"1\">" nil t)
         (let ((subj-start (point))
-              (trans-start (search-forward "</td>\n<td class=\"trans\" width=\"100%\">"))
+              (trans-start (re-search-forward "</td>\n<td class=\"trans[0-9]?\" width=\"100%\">"))
               (subj-end (match-beginning 0))
               (trans-end (and (search-forward "</td></tr>") (match-beginning 0))))
           (push (cons (multitran--parse-subj subj-start subj-end)
@@ -844,7 +844,8 @@ DIRECTION is one of 'next or 'prev."
 ;;
 ;; * History
 ;;
-;; ** Version 0.4.12:
+;; ** Version 0.4.13:
+;;    - Fixes due to multitran.com API changes
 ;;    - Title format has been changed, so we multitran adopted regex
 ;;      to extract word from the title.
 ;;
