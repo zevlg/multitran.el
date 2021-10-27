@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.13
-(defconst multitran-version "0.4.13")
+;; Version: 0.4.14
+(defconst multitran-version "0.4.14")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -844,7 +844,7 @@ DIRECTION is one of 'next or 'prev."
 ;;
 ;; * History
 ;;
-;; ** Version 0.4.13:
+;; ** Version 0.4.14:
 ;;    - Fixes due to multitran.com API changes
 ;;    - Title format has been changed, so we multitran adopted regex
 ;;      to extract word from the title.
