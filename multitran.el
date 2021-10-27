@@ -480,7 +480,7 @@ First element is parsed title, rest elements are in form
 
     ;; Parse subjects and translations
     (with-multitran-region sec-start end
-      (while (search-forward "<tr><td class=\"subj\" width=\"1\">" nil t)
+      (while (search-forward "<tr><td class=\"subj\" width=\"1%\">" nil t)
         (let ((subj-start (point))
               (trans-start (re-search-forward "</td>\n<td class=\"trans[0-9]?\" width=\"100%\">"))
               (subj-end (match-beginning 0))
