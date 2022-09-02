@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.14
-(defconst multitran-version "0.4.14")
+;; Version: 0.4.15
+(defconst multitran-version "0.4.15")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -426,7 +426,7 @@ Return point just after open-tag."
 (defun multitran--parse-a-name ()
   ;; remove <a name="xxx">XXX</a> anchors
   (save-excursion
-    (while (re-search-forward "<a name =[^>]*>[^<]*</[aA]>" nil t)
+    (while (re-search-forward "<a name ?=[^>]*>[^<]*</[aA]>" nil t)
       (replace-match "" nil nil))))
 
 (defun multitran--parse-section-title (start end)
@@ -442,7 +442,14 @@ Return point just after open-tag."
     (multitran--parse-span-gray "/" "/")
     (multitran--parse-em)
 
-    (concat (buffer-string) "\n")))
+    ;; Remove leading/trailing whitespaces
+    (let ((title (buffer-string)))
+      (when (string-match "\\`\\s-+" title)
+        (setq title (substring title (match-end 0))))
+      (when (string-match "\\s-+\\'" title)
+        (setq title (substring title 0 (match-beginning 0))))
+
+      (concat title "\n"))))
 
 (defconst multitran--section-start "<tr><td colspan=\"2\" class=\"gray\">&nbsp;")
 
@@ -843,6 +850,9 @@ DIRECTION is one of 'next or 'prev."
 ;;; ellit-org: history
 ;;
 ;; * History
+;;
+;; ** Version 0.4.15:
+;;    - Fixes due to multitran.com API change
 ;;
 ;; ** Version 0.4.14:
 ;;    - Fixes due to multitran.com API changes
