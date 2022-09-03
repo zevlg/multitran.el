@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.15
-(defconst multitran-version "0.4.15")
+;; Version: 0.4.16
+(defconst multitran-version "0.4.16")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -236,13 +236,13 @@ Otherwise header is inserted as plain text on top of multitran buffer."
 
 (defface multitran-section-face
   '((((class color) (background light))
-     (:background "Gray70"))
+     (:background "Gray70" :extend t))
     (((class color) (background dark))
-     (:background "Gray20"))
+     (:background "Gray20" :extend t))
     (((class grayscale) (background light))
-     (:background "Gray70"))
+     (:background "Gray70" :extend t))
     (((class grayscale) (background dark))
-     (:background "Gray20")))
+     (:background "Gray20" :extend t)))
   "Face used for displaying translation section."
   :group 'multitran)
 
@@ -850,6 +850,9 @@ DIRECTION is one of 'next or 'prev."
 ;;; ellit-org: history
 ;;
 ;; * History
+;;
+;; ** Version 0.4.16:
+;;    - Use `:extend' attribute for the `multitran-section-face' face.
 ;;
 ;; ** Version 0.4.15:
 ;;    - Fixes due to multitran.com API change
