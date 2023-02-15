@@ -78,6 +78,27 @@ Or just tweak following user options in your =init.el=:
   (cl-pushnew (cons ?M 'multitran-at-pos) avy-dispatch-alist)
 #+end_src
 
+* Usage example with binding to keys
+#+begin_src lisp
+(defun my/multitran-at-pos-en (pos)
+  (interactive (list (point)))
+  (setq multitran-languages '("English" . "Russian") )
+  (multitran-at-pos pos)
+  )
+
+(defun my/multitran-at-pos-ch (pos)
+  (interactive (list (point)))
+  (setq multitran-languages '("Chinese" . "English") )
+  (multitran-at-pos pos)
+  )
+
+(defun my/multitran()
+  (local-set-key (kbd "C-c t e") 'my/multitran-at-pos-en )
+  (local-set-key (kbd "C-c t c") 'my/multitran-at-pos-ch )
+  )
+(add-hook 'fundamental-mode-hook 'my/multitran)
+(add-hook 'org-mode-hook 'my/multitran)
+#+end_src
 
 * History
 :PROPERTIES:
