@@ -429,6 +429,18 @@ Return point just after open-tag."
     (while (re-search-forward "<a name ?=[^>]*>[^<]*</[aA]>" nil t)
       (replace-match "" nil nil))))
 
+(defun multitran--parse-div ()
+  ;; remove <div class="orig11"></div>
+  (save-excursion
+    (while (search-forward "<div class=\"orig11\"><div class=\"origl\">\n"
+                           nil t)
+      (replace-match "" nil nil)
+      (let ((cpont (point))
+            (regexp "</div><div class=\"origr\">\\(?:<span\
+ class=\"small\">stresses</span>\\)?</div></div>"))
+        (re-search-forward regexp nil t)
+        (replace-match "" nil nil)))))
+
 (defun multitran--parse-section-title (start end)
   "Extract section's title."
   (with-multitran-region start end
@@ -441,6 +453,7 @@ Return point just after open-tag."
     (multitran--parse-a-name)           ;remove "English thesaurus" anchor
     (multitran--parse-span-gray "/" "/")
     (multitran--parse-em)
+    (multitran--parse-div)
 
     ;; Remove leading/trailing whitespaces
     (let ((title (buffer-string)))
@@ -478,7 +491,7 @@ Return point just after open-tag."
   "Return parsed section.
 First element is parsed title, rest elements are in form
 \(SUBJ . TRANS\)"
-  (let ((sh-start (search-forward "<tr><td colspan=\"2\" class=\"gray\">&nbsp;" end))
+  (let ((sh-start (search-forward "<tr><td colspan = \"2\">" end))
         (sec-start (search-forward "</td></tr>" end))
         (sh-end (match-beginning 0))
         section-title subjs-trans)
@@ -518,7 +531,7 @@ First element is parsed title, rest elements are in form
         section-points sections)
     ;; Extract all sections
     (goto-char start)
-    (while (search-forward "<tr><td colspan=\"2\" class=\"gray\">&nbsp;" end t)
+    (while (search-forward "<tr height=\"3px\"><td colspan=\"2\">" end t)
       (push (match-beginning 0) section-points))
     (push end section-points)
 
