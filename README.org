@@ -1,6 +1,6 @@
-#+OPTIONS: timestamp:nil
-#+TITLE: multitran.el
-#+AUTHOR: Zajcev Evgeny
+#+options: timestamp:nil
+#+title: multitran.el
+#+author: Zajcev Evgeny
 #+startup: showall
 
 #+begin_quote
@@ -32,6 +32,7 @@ Install from [[http://melpa.org][MELPA]] using
 
 Make sure your MELPA package archive is up-to-date with
 @@html:<kbd>@@M-x package-refresh-contents RET@@html:</kbd>@@
+
 
 * Variables to customize
 :PROPERTIES:
@@ -84,11 +85,34 @@ Or just tweak following user options in your =init.el=:
 :CUSTOM_ID: history
 :END:
 
-** Version 0.4.12:
+** Version 0.5.0:
 :PROPERTIES:
-:CUSTOM_ID: version-0412
+:CUSTOM_ID: version-050
 :END:
 
+- Adapt to multitran.com API changes, thanks to @avityazev
+- Rip off links to images
+
+** Version 0.4.16:
+:PROPERTIES:
+:CUSTOM_ID: version-0416
+:END:
+
+- Use ~:extend~ attribute for the ~multitran-section-face~ face.
+
+** Version 0.4.15:
+:PROPERTIES:
+:CUSTOM_ID: version-0415
+:END:
+
+- Fixes due to multitran.com API change
+
+** Version 0.4.14:
+:PROPERTIES:
+:CUSTOM_ID: version-0414
+:END:
+
+- Fixes due to multitran.com API changes
 - Title format has been changed, so we multitran adopted regex
   to extract word from the title.
 

@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.4.16
-(defconst multitran-version "0.4.16")
+;; Version: 0.5.0
+(defconst multitran-version "0.5.0")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -357,6 +357,13 @@ Faceify tag contents with FACE."
 (defun multitran--parse-amp ()
   (multitran--parse-with-replace "&amp;" " "))
 
+(defun multitran--parse-img-links ()
+  ;; TODO: replace with inline image for the out link
+  ;; https://www.multitran.com/gif/link.svg
+  (save-excursion
+    (while (re-search-forward "<img[^>]+>" nil t)
+      (replace-match "" nil nil))))
+
 (defun multitran--parse-unicode-chars ()
   (save-excursion
     (while (re-search-forward "&#\\([0-9]+\\);" nil t)
@@ -475,6 +482,7 @@ Return point just after open-tag."
 (defun multitran--parse-trans (start end)
   (with-multitran-region start end
     (multitran--parse-links)
+    (multitran--parse-img-links)
     (multitran--parse-span-gray)
     (multitran--parse-span-rgb)
     (multitran--parse-reliability-of-translation)
@@ -864,8 +872,12 @@ DIRECTION is one of 'next or 'prev."
 ;;
 ;; * History
 ;;
+;; ** Version 0.5.0:
+;;    - Adapt to multitran.com API changes, thanks to @avityazev
+;;    - Rip off links to images
+;; 
 ;; ** Version 0.4.16:
-;;    - Use `:extend' attribute for the `multitran-section-face' face.
+;;    - Use ~:extend~ attribute for the ~multitran-section-face~ face.
 ;;
 ;; ** Version 0.4.15:
 ;;    - Fixes due to multitran.com API change
