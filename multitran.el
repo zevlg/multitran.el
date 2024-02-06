@@ -6,8 +6,8 @@
 ;; Created: Wed Apr 13 01:00:05 2016
 ;; Keywords: dictionary, hypermedia
 ;; Package-Requires: ((emacs "24") (cl-lib "0.5"))
-;; Version: 0.5.0
-(defconst multitran-version "0.5.0")
+;; Version: 0.5.1
+(defconst multitran-version "0.5.1")
 
 ;; multitran.el is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -321,7 +321,7 @@ Entering multitran mode runs `multitran-mode-hook'."
          ,@body))))
 (put 'with-multitran-region 'lisp-indent-function 2)
 
-(defun multitran--parse-tag (tagname face)
+(defun multitran--parse-tag (tagname &optional face)
   "Parse <TAGNAME> tags.
 Faceify tag contents with FACE."
   (save-excursion
@@ -331,7 +331,8 @@ Faceify tag contents with FACE."
         (when (search-forward (concat "</" tagname ">") nil t)
           ;; Do it only if tag is actually closed
           (replace-match "" nil nil)
-          (multitran-faceify cpont (point) face))))))
+          (when face
+            (multitran-faceify cpont (point) face)))))))
 
 (defun multitran--parse-em ()
   (multitran--parse-tag "em" 'italic))
@@ -389,13 +390,16 @@ Return point just after open-tag."
    "<span title=\"reliability of translation = [0-9]/[0-9]\">"
    "" "" cpont))
 
-(defun multitran--parse-span-gray (&optional rep1 rep2)
+(defun multitran--parse-span-color (color &optional rep1 rep2)
   (save-excursion
-    (while (search-forward "<span style=\"color:gray\">" nil t)
+    (while (search-forward (format "<span style=\"color:%s\">" color) nil t)
       (replace-match (or rep1 "") nil nil)
       (let ((cpont (point)))
         (search-forward "</span>" nil t)
         (replace-match (or rep2 "") nil nil)))))
+
+(defun multitran--parse-span-gray (&optional rep1 rep2)
+  (multitran--parse-span-color "gray" rep1 rep2))
 
 (defun multitran--parse-span-rgb (&optional rep1 rep2)
   (save-excursion
@@ -459,6 +463,7 @@ Return point just after open-tag."
     (multitran--parse-links)
     (multitran--parse-a-name)           ;remove "English thesaurus" anchor
     (multitran--parse-span-gray "/" "/")
+    (multitran--parse-span-color "#8")
     (multitran--parse-em)
     (multitran--parse-div)
 
@@ -475,6 +480,7 @@ Return point just after open-tag."
 
 (defun multitran--parse-subj (start end)
   (with-multitran-region start end
+    (multitran--parse-tag "nobr")
     (multitran--parse-nbsp "")
     (multitran--parse-links :no-linkfy-and-facefy)
     (buffer-string)))
@@ -871,6 +877,10 @@ DIRECTION is one of 'next or 'prev."
 ;;; ellit-org: history
 ;;
 ;; * History
+;;
+;; ** Version 0.5.1:
+;;    - Parse #8 color
+;;    - Get rid of <nobr> tag in subjects
 ;;
 ;; ** Version 0.5.0:
 ;;    - Adapt to multitran.com API changes, thanks to @avityazev

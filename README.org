@@ -63,7 +63,7 @@ Or just tweak following user options in your =init.el=:
 
     (setq multitran-header-formatters
           '(miltitran--hf-word multitran--hf-languages
-    	my-multitran--hf-wordfreq multitran--hf-history))
+            my-multitran--hf-wordfreq multitran--hf-history))
   #+end_src
 
   Where ~wordfreq-find~ is from
@@ -84,6 +84,14 @@ Or just tweak following user options in your =init.el=:
 :PROPERTIES:
 :CUSTOM_ID: history
 :END:
+
+** Version 0.5.1:
+:PROPERTIES:
+:CUSTOM_ID: version-051
+:END:
+
+- Parse #8 color
+- Get rid of <nobr> tag in subjects
 
 ** Version 0.5.0:
 :PROPERTIES:
